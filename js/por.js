@@ -1,88 +1,106 @@
-const hamburger = document.getElementById("hamburger");
-const menu = document.getElementById("menu");
-const links = document.querySelectorAll(".menu a");
-const sections = document.querySelectorAll("section");
+document.addEventListener("DOMContentLoaded", () => {
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll(".nav-link");
+  const navbar = document.querySelector(".navbar");
 
-hamburger.onclick = () => {
-  menu.classList.toggle("active");
-};
+  // 1. Fungsi Animasi Scroll Reveal 
+  function scrollReveal() {
+    const reveals = document.querySelectorAll(".reveal");
+    reveals.forEach((el) => {
+      const windowHeight = window.innerHeight;
+      const revealTop = el.getBoundingClientRect().top;
+      const revealPoint = 100;
 
-// =========================
-// SCROLL REVEAL
-// =========================
-function reveal() {
-  document.querySelectorAll(".reveal").forEach(el => {
-    const top = el.getBoundingClientRect().top;
-    const height = window.innerHeight;
+      if (revealTop < windowHeight - revealPoint) {
+        el.classList.add("show");
+      }
+    });
+  }
 
-    if (top < height - 100) {
-      el.classList.add("show");
+  // 2. Fungsi Menu Navigasi Aktif Otomatis Berdasarkan Posisi Halaman
+  function highlightMenu() {
+    let currentSectionId = "";
+    
+    sections.forEach((section) => {
+      const sectionTop = section.offsetTop;
+      if (window.pageYOffset >= (sectionTop - 200)) {
+        currentSectionId = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.remove("active");
+      if (link.getAttribute("href").includes(currentSectionId)) {
+        link.classList.add("active");
+      }
+    });
+  }
+
+  // 3. Efek Navbar Saat Digulir Ke Bawah
+  function handleNavbarScroll() {
+    if (window.scrollY > 50) {
+      navbar.classList.add("scrolled");
+    } else {
+      navbar.classList.remove("scrolled");
     }
-  });
-}
+  }
 
-// =========================
-// ACTIVE NAVBAR (INI YANG LO MAU)
-// =========================
-function activeMenu() {
-  let scrollY = window.scrollY;
-
-  sections.forEach(sec => {
-    const top = sec.offsetTop - 120;
-    const height = sec.offsetHeight;
-    const id = sec.getAttribute("id");
-
-    if (scrollY >= top && scrollY < top + height) {
-      links.forEach(link => {
-        link.classList.remove("active");
+  // 4. Hamburger Menu Seluler
+  const hamburger = document.getElementById("hamburger");
+  const menu = document.getElementById("menu");
+  
+  if (hamburger && menu) {
+    hamburger.onclick = () => {
+      menu.classList.toggle("active");
+    };
+    navLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        menu.classList.remove("active");
       });
+    });
+  }
 
-      document
-        .querySelector('.menu a[href="#' + id + '"]')
-        .classList.add("active");
+  window.addEventListener("scroll", () => {
+    scrollReveal();
+    highlightMenu();
+    handleNavbarScroll();
+  });
+
+  // Eksekusi Pemicu Awal Pemuatan
+  scrollReveal();
+  highlightMenu();
+  handleNavbarScroll();
+    // --- LOGIKA KLIK ZOOM SERTIFIKAT ---
+  const modal = document.getElementById("certModal");
+  const modalImg = document.getElementById("imgExpanded");
+  const captionText = document.getElementById("captionModal");
+  const closeModal = document.querySelector(".close-modal");
+  
+  // Ambil semua gambar yang ada di dalam kartu sertifikat
+  const certImages = document.querySelectorAll(".cert-img-container img");
+
+  certImages.forEach(img => {
+    // Buat kursor berubah jadi icon zoom-in saat diarahkan ke gambar
+    img.style.cursor = "zoom-in";
+    
+    img.onclick = function() {
+      modal.style.display = "block";
+      modalImg.src = this.src; // Ambil gambar yang diklik
+      captionText.innerHTML = this.alt; // Ambil teks alternatif sebagai judul popup
     }
   });
-}
 
-// =========================
-// TEXT ANIMATION
-// =========================
-function wordAnim() {
-  document.querySelectorAll(".word").forEach(el => {
-    let words = el.innerText.split(" ");
-    el.innerHTML = words.map(w => `<span>${w}</span>`).join(" ");
+  // Fungsi menutup modal saat tombol (X) diklik
+  if (closeModal) {
+    closeModal.onclick = function() {
+      modal.style.display = "none";
+    }
+  }
 
-    el.querySelectorAll("span").forEach((span, i) => {
-      setTimeout(() => span.classList.add("show"), i * 150);
-    });
+  // Fungsi menutup modal otomatis jika user klik area kosong di luar gambar
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
   });
-}
-
-function sentenceAnim() {
-  document.querySelectorAll(".sentence").forEach(el => {
-    let s = el.innerText.split(".");
-    el.innerHTML = s
-      .filter(x => x.trim())
-      .map(x => `<span>${x.trim()}.</span>`)
-      .join("");
-
-    el.querySelectorAll("span").forEach((span, i) => {
-      setTimeout(() => span.classList.add("show"), i * 500);
-    });
-  });
-}
-
-// =========================
-// EVENT
-// =========================
-window.addEventListener("scroll", () => {
-  reveal();
-  activeMenu(); // ⛔ ini kunci
-});
-
-window.addEventListener("load", () => {
-  reveal();
-  activeMenu();
-  wordAnim();
-  sentenceAnim();
 });
