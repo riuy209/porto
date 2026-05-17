@@ -59,48 +59,104 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  
+  // --- 5. LOGIKA FILTER GALERI KEGIATAN (KOSONG DI AWAL) ---
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const galleryItems = document.querySelectorAll(".gallery-item");
+  const galleryHint = document.getElementById("galleryHint"); // Ambil elemen teks petunjuk
 
-  window.addEventListener("scroll", () => {
-    scrollReveal();
-    highlightMenu();
-    handleNavbarScroll();
+  // Sembunyikan semua foto kegiatan saat pertama kali web dimuat
+  galleryItems.forEach(item => {
+    item.classList.add("hide");
+    item.classList.remove("show-active");
   });
 
-  // Eksekusi Pemicu Awal Pemuatan
-  scrollReveal();
-  highlightMenu();
-  handleNavbarScroll();
-    // --- LOGIKA KLIK ZOOM SERTIFIKAT ---
+  // Logika ketika tombol filter diklik
+  filterButtons.forEach(button => {
+    button.addEventListener("click", function() {
+      // Sembunyikan teks petunjuk "Mohon klik tombol..." dengan efek transisi atau langsung hilang
+      if (galleryHint) {
+        galleryHint.style.display = "none";
+      }
+
+      // Atur tombol yang aktif
+      filterButtons.forEach(btn => btn.classList.remove("active"));
+      this.classList.add("active");
+
+      const targetCategory = this.getAttribute("data-target");
+
+      // Sortir fotonya
+      galleryItems.forEach(item => {
+        const itemCategory = item.getAttribute("data-category");
+
+        if (itemCategory === targetCategory) {
+          item.classList.remove("hide");
+          setTimeout(() => {
+            item.classList.add("show-active");
+          }, 20); // Jeda micro-second untuk memicu efek transisi CSS
+        } else {
+          item.classList.remove("show-active");
+          item.classList.add("hide");
+        }
+      });
+    });
+  });
+
+  // --- 6. LOGIKA KLIK ZOOM SERTIFIKAT (MODAL LIGHTBOX) ---
   const modal = document.getElementById("certModal");
   const modalImg = document.getElementById("imgExpanded");
   const captionText = document.getElementById("captionModal");
   const closeModal = document.querySelector(".close-modal");
   
-  // Ambil semua gambar yang ada di dalam kartu sertifikat
   const certImages = document.querySelectorAll(".cert-img-container img");
 
   certImages.forEach(img => {
-    // Buat kursor berubah jadi icon zoom-in saat diarahkan ke gambar
     img.style.cursor = "zoom-in";
     
     img.onclick = function() {
       modal.style.display = "block";
-      modalImg.src = this.src; // Ambil gambar yang diklik
-      captionText.innerHTML = this.alt; // Ambil teks alternatif sebagai judul popup
+      modalImg.src = this.src; 
+      captionText.innerHTML = this.alt; 
     }
   });
 
-  // Fungsi menutup modal saat tombol (X) diklik
   if (closeModal) {
     closeModal.onclick = function() {
       modal.style.display = "none";
     }
   }
 
-  // Fungsi menutup modal otomatis jika user klik area kosong di luar gambar
   window.addEventListener("click", (e) => {
     if (e.target === modal) {
       modal.style.display = "none";
     }
   });
+
+  // Jalankan fungsi scroll saat halaman digulir
+  window.addEventListener("scroll", () => {
+    scrollReveal();
+    highlightMenu();
+    handleNavbarScroll();
+  });
+
+  // Eksekusi pemicu awal saat halaman sukses dimuat
+  scrollReveal();
+  highlightMenu();
+  handleNavbarScroll();
+  
+    // --- LOGIKA SMOOTH LAZY LOADING ---
+  const lazyImages = document.querySelectorAll('.lazy-img');
+
+  lazyImages.forEach(img => {
+    // Jika gambar ternyata sudah selesai di-load (cache browser)
+    if (img.complete) {
+      img.setAttribute('data-loaded', 'true');
+    } else {
+      // Jika baru di-load saat di-scroll
+      img.addEventListener('load', () => {
+        img.setAttribute('data-loaded', 'true');
+      });
+    }
+  });
+
 });
