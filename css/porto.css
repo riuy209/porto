@@ -54,7 +54,7 @@ body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-beh
   height: 340px;
   border-radius: 50%;
   background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
-  filter: blur(35px); /* Membuat efek pancaran cahaya keluar */
+  filter: blur(35px);
   opacity: 0.75;
   z-index: 1;
   animation: pulseGlow 4s infinite alternate ease-in-out;
@@ -67,8 +67,8 @@ body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-beh
   height: 320px;
   border-radius: 50%;
   overflow: hidden;
-  z-index: 2; /* Berada di depan backlight-glow */
-  border: 4px solid #060913; /* Pembatas gelap agar foto terlihat terpisah tajam dengan cahaya belakang */
+  z-index: 2;
+  border: 4px solid #060913;
   box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
 }
 .profile-circle-container img { width: 100%; height: 100%; object-fit: cover; }
@@ -95,18 +95,54 @@ body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-beh
 .glass-card { background: var(--glass); padding: 35px; border-radius: 24px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); font-size: 1.1rem; line-height: 1.8; color: #cbd5e1; }
 
 /* Grids */
-.skills-grid, .gallery-grid, .cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+.skills-grid, .cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
 .skill-card, .cert-card { background: var(--glass); padding: 35px 25px; border-radius: 24px; border: 1px solid var(--glass-border); backdrop-filter: blur(10px); transition: 0.4s ease; text-align: center; }
 .skill-card:hover, .cert-card:hover { transform: translateY(-10px); border-color: var(--accent-blue); box-shadow: 0 10px 30px rgba(0, 212, 255, 0.15); }
 .skill-icon { font-size: 2.5rem; color: var(--accent-blue); margin-bottom: 20px; }
 
-/* Gallery Style */
-.gallery-item { position: relative; border-radius: 24px; overflow: hidden; height: 260px; border: 1px solid var(--glass-border); }
-.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s ease; }
-.gallery-item:hover img { transform: scale(1.06); }
-.overlay { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(6, 9, 19, 0.9)); display: flex; align-items: flex-end; padding: 25px; opacity: 0; transition: 0.3s; }
-.gallery-item:hover .overlay { opacity: 1; }
-.overlay span { font-weight: 600; color: var(--accent-blue); }
+/* --- STYLE FILTER TOMBOL GALERI KEGIATAN --- */
+.filter-categories { display: flex; justify-content: center; gap: 15px; margin-bottom: 40px; flex-wrap: wrap; }
+.filter-btn { padding: 10px 22px; border-radius: 50px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02); color: #94a3b8; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.3s ease; }
+.filter-btn:hover, .filter-btn.active { background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); color: #060913; border-color: transparent; box-shadow: 0 0 15px rgba(0, 210, 255, 0.4); }
+
+/* --- STYLE GALERI ITEM & ANIMASI (BERSIH & TIDAK DUPLIKAT) --- */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+
+.gallery-item {
+  position: relative; 
+  border-radius: 24px; 
+  overflow: hidden; 
+  height: 280px; /* Jauh lebih tinggi agar deskripsi penjelasan teks langsung muat */
+  border: 1px solid var(--glass-border);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+/* Penentu kendali buka-tutup element via JavaScript */
+.gallery-item.hide { display: none !important; }
+.gallery-item.show-active { opacity: 1 !important; transform: scale(1) !important; }
+
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+.gallery-item:hover img { transform: scale(1.05); }
+
+/* --- STYLE OVERLAY TEKS PERMANEN (LANGSUNG MUNCUL) --- */
+.overlay { 
+  position: absolute; 
+  inset: 0; 
+  background: linear-gradient(to top, rgba(6, 9, 19, 0.98) 0%, rgba(6, 9, 19, 0.6) 55%, transparent 100%); 
+  display: flex; 
+  align-items: flex-end; 
+  padding: 20px; 
+  opacity: 1 !important; 
+  visibility: visible !important;
+  z-index: 5;
+  pointer-events: none; /* Mencegah bentrok fungsi klik gambar */
+}
+
+.overlay-content { display: flex; flex-direction: column; gap: 8px; width: 100%; text-align: left; }
+.overlay-content h3 { font-size: 1.15rem; font-weight: 700; color: var(--accent-blue); margin: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+.overlay-content p { font-size: 0.85rem; color: #e2e8f0; line-height: 1.5; margin: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
 
 /* Cert Image Container */
 .cert-img-container { width: 100%; height: 180px; overflow: hidden; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--glass-border); }
@@ -127,32 +163,18 @@ body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-beh
 .reveal { opacity: 0; transform: translateY(30px); transition: 0.8s ease-out; }
 .reveal.show { opacity: 1; transform: translateY(0); }
 
-/* Responsive Grid Screen Rules */
-@media (max-width: 992px) {
-  .hero { flex-direction: column-reverse; justify-content: center; text-align: center; height: auto; padding-top: 140px; padding-bottom: 60px; }
-  .hero-content h1 { font-size: 2.8rem; }
-  .profile-circle-container { width: 260px; height: 260px; }
-  .backlight-glow { width: 280px; height: 280px; }
-}
-@media (max-width: 768px) {
-  .menu { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; width: 100%; background: #0c1224; padding: 20px; border-bottom: 1px solid var(--glass-border); }
-  .menu.active { display: flex; }
-  .menu a { margin: 10px 0; }
-  .hamburger { display: block; color: white; font-size: 1.5rem; cursor: pointer; }
-  .section-padding { padding: 60px 5%; }
-}
 /* --- STYLE POPUP SERTIFIKAT (MODAL) --- */
 .modal {
-  display: none; /* Sembunyi sebelum diklik */
+  display: none; 
   position: fixed;
-  z-index: 2000; /* Di atas navbar */
+  z-index: 2000; 
   padding-top: 100px;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(6, 9, 19, 0.95); /* Gelap neon */
+  background-color: rgba(6, 9, 19, 0.95); 
   backdrop-filter: blur(10px);
 }
 
@@ -191,20 +213,38 @@ body { background: var(--bg); color: var(--text); overflow-x: hidden; scroll-beh
   transition: 0.3s;
   cursor: pointer;
 }
+.close-modal:hover { color: var(--accent-pink); transform: scale(1.2); }
 
-.close-modal:hover {
-  color: var(--accent-pink);
-  transform: scale(1.2);
-}
-
-/* Efek Animasi Zoom Muncul */
 @keyframes zoomInModal {
   from { transform: scale(0); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
-/* Responsif Layar HP */
+/* Responsive Grid Screen Rules */
+@media (max-width: 992px) {
+  .hero { flex-direction: column-reverse; justify-content: center; text-align: center; height: auto; padding-top: 140px; padding-bottom: 60px; }
+  .hero-content h1 { font-size: 2.8rem; }
+  .profile-circle-container { width: 260px; height: 260px; }
+  .backlight-glow { width: 280px; height: 280px; }
+}
+@media (max-width: 768px) {
+  .menu { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; width: 100%; background: #0c1224; padding: 20px; border-bottom: 1px solid var(--glass-border); }
+  .menu.active { display: flex; }
+  .menu a { margin: 10px 0; }
+  .hamburger { display: block; color: white; font-size: 1.5rem; cursor: pointer; }
+  .section-padding { padding: 60px 5%; }
+}
 @media only screen and (max-width: 700px){
   .modal-content { width: 95%; }
   .close-modal { top: 15px; right: 25px; }
+}
+/* Efek Lazy Loading Smooth Fade-in */
+.lazy-img {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Ketika gambar selesai di-download oleh browser, otomatis opacity jadi 1 */
+.lazy-img[data-loaded="true"] {
+  opacity: 1;
 }
